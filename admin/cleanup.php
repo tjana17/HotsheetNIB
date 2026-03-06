@@ -2,11 +2,11 @@
 /**
  * Cleanup expired offers from disk and database.
  */
-function cleanup_expired_files($pdo) {
+function cleanup_expired_files($pdo, $currentTime) {
     try {
-        // Find expired files
-        $stmt = $pdo->prepare("SELECT filename FROM offer_metadata WHERE expiry_time <= NOW()");
-        $stmt->execute();
+        // Find expired files using the provided current time to ensure consistency with PHP
+        $stmt = $pdo->prepare("SELECT filename FROM offer_metadata WHERE expiry_time <= ?");
+        $stmt->execute([$currentTime]);
         $expiredFiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if ($expiredFiles) {

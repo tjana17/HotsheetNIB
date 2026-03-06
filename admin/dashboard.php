@@ -12,6 +12,7 @@ if (empty($_SESSION['user_id'])) {
   <title>Dashboard — New India Bazar</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
   <nav class="navbar navbar-expand bg-white shadow-sm">
@@ -19,7 +20,7 @@ if (empty($_SESSION['user_id'])) {
       <a class="navbar-brand" href="dashboard"><img src="https://www.newindiabazar.com/images/logo.png" alt="Logo" height="50"></a>
       <div class="d-flex align-items-center">
         <div class="me-3 text-muted"><?=htmlspecialchars($_SESSION['user_name'])?></div>
-        <a class="btn btn-outline-secondary me-2" href="logout">Sign out</a>
+        <a class="btn btn-outline-secondary me-2" href="logout"><i class="bi bi-power"></i> Sign out</a>
       </div>
     </div>
   </nav>
@@ -29,10 +30,10 @@ if (empty($_SESSION['user_id'])) {
       <h4 class="mb-0">Offers</h4>
         <div>
           <?php if($_SESSION['role']=='admin'): ?>
-            <a href="admin_dashboard.php" class="btn btn-warning">Admin Dashboard</a>
+            <a href="admin_dashboard.php" class="btn btn-warning"><i class="bi bi-person-circle"></i> Admin Dashboard</a>
           <?php endif; ?>
-            <a class="btn btn-secondary" onclick="openTour()">Offer Guide</a>
-            <a href="upload" class="btn btn-primary">Create Offer</a>
+            <a class="btn btn-secondary" onclick="openTour()"><i class="bi bi-question-circle"></i> Offer Guide</a>
+            <a href="upload" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create Offer</a>
       </div>
     </div>
     <!-- <div><a href="recent" class="btn btn-secondary">Recent</a> </div> -->
@@ -56,16 +57,26 @@ async function fetchImages(){
     data.forEach(img => {
       const col = document.createElement('div');
       col.className = 'col-sm-6 col-md-4';
+      const isPDF = img.filename.toLowerCase().endsWith('.pdf');
+      const previewHtml = isPDF 
+        ? `<div class="card-img-top bg-secondary-subtle d-flex align-items-center justify-content-center" style="height:180px;">
+             <i class="bi bi-file-earmark-pdf text-secondary" style="font-size: 4rem;"></i>
+           </div>`
+        : `<img src="${img.url}?t=${Date.now()}" class="card-img-top" style="height:180px;object-fit:cover;">`;
+
       col.innerHTML = `
         <div class="card h-100 shadow-sm">
-          <img src="${img.url}?t=${Date.now()}" class="card-img-top" style="height:180px;object-fit:cover;">
+          ${previewHtml}
           <div class="card-body d-flex flex-column">
             <h6 class="card-title mb-1">${img.name}</h6>
             <p class="text-muted small mb-1">From: ${img.start_time}</p>
             <p class="text-muted small mb-2">To: ${img.expiry_time}</p>
             <div class="mt-auto d-flex justify-content-between">
-              <a class="btn btn-sm btn-outline-primary" href="${img.url}?t=${Date.now()}" target="_blank">View</a>
-              <button class="btn btn-sm btn-danger" onclick="deleteImage('${img.filename}', this)">Delete</button>
+              <div class="btn-group btn-group-sm">
+                <a class="btn btn-outline-primary" href="${img.url}?t=${Date.now()}" target="_blank"><i class="bi bi-eye"></i> View</a>
+                <a class="btn btn-outline-secondary" href="upload.php?edit=${img.filename}"><i class="bi bi-pencil"></i> Edit</a>
+              </div>
+              <button class="btn btn-sm btn-danger" onclick="deleteImage('${img.filename}', this)"><i class="bi bi-trash"></i> Delete</button>
             </div>
           </div>
         </div>`;

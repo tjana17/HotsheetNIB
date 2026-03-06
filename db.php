@@ -3,6 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+date_default_timezone_set('America/Los_Angeles');
 // Update with your DB credentials
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'hotsheetapp');
@@ -21,6 +22,9 @@ try {
         DB_PASS,
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
+    
+    // Synchronize MySQL session timezone with PHP's timezone offset (e.g., -08:00 or -07:00 for DST)
+    $pdo->exec("SET time_zone = '" . date('P') . "'");
 } catch (Exception $e) {
     // Fail gracefully on public side
     error_log("DB Connection failed: " . $e->getMessage());
@@ -29,7 +33,7 @@ try {
 if (is_file(__DIR__ . '/admin/cleanup.php')) {
     require_once __DIR__ . '/admin/cleanup.php';
     if (isset($pdo)) {
-        cleanup_expired_files($pdo);
+        cleanup_expired_files($pdo, date('Y-m-d H:i:s'));
     }
 }
 

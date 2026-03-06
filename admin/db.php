@@ -3,6 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+date_default_timezone_set('America/Los_Angeles');
 // Update with your DB credentials
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'hotsheetapp');
@@ -21,6 +22,9 @@ try {
         DB_PASS,
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
+
+    // Synchronize MySQL session timezone with PHP's timezone offset (e.g., -08:00 or -07:00 for DST)
+    $pdo->exec("SET time_zone = '" . date('P') . "'");
 
     // Migration: ensure offer_metadata table exists
     $pdo->exec("CREATE TABLE IF NOT EXISTS offer_metadata (
@@ -48,7 +52,7 @@ require_once __DIR__ . '/cleanup.php';
 if (stripos($_SERVER['PHP_SELF'], 'upload.php') === false) {
     // skip cleanup on upload.php to avoid race conditions if needed, 
     // but generally okay to run it.
-    cleanup_expired_files($pdo);
+    cleanup_expired_files($pdo, date('Y-m-d H:i:s'));
 }
 
 // No caching headers for dynamic pages
